@@ -1,4 +1,6 @@
-#pragma once
+
+#ifndef POWER_H
+#define POWER_H
 
 // ******************************
 //
@@ -25,3 +27,5 @@ extern BATTERY_FAULT_T gBatteryFault;
 
 enum powerState {}
 */
+
+#endif

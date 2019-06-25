@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BACKLIGHT_H
+#define BACKLIGHT_H
 
 // ******************************
 //
@@ -31,3 +32,6 @@ void theaterChaseRainbow(int wait);
 void backlightAnimationOne(void);
 void backlightAnimationTwo(void);
 void backlightAnimationThree(void);
+
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOST60_H
+#define LOST60_H
 
 /*
   lost60.h
@@ -12,6 +13,10 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <bluefruit.h>
+
+//objects
+extern BLEDis bledis;
+extern BLEHidAdafruit blehid;
 
 //misc definitions
 #define STATE_ONE_TIME 2000
@@ -60,3 +65,5 @@
     #define BUTTON_ONE 13
 #endif
 */
+
+#endif
