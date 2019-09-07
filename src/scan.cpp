@@ -248,6 +248,8 @@ HID_KEY_SHIFT_RIGHT,
 HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
 };
 
+uint8_t* layerOf(uint8_t);
+
 
 uint8_t colCount = sizeof(cols);
 uint8_t rowCount = sizeof(rows);
@@ -271,6 +273,8 @@ bool layerChange = false;
 
 enum layer{LAYER_0,LAYER_1,LAYER_2,LAYER_3,LAYER_4,LAYER_5,LAYER_6,LAYER_7,LAYER_8,LAYER_9,LAYER_10,LAYER_11,LAYER_12,LAYER_13,LAYER_14,LAYER_15};
 enum layer myLayer; //myLayer is a variable of type layer 
+
+
 
 // Modifier keys, only take cares of Shift
 // ATL, CTRL, CMD keys are left for user excersie.
@@ -415,7 +419,7 @@ void scanLoop(){
     uint8_t keycode[6] = { 0 };
 
     
-    // scan modifier key (only SHIFT), user implement ATL, CTRL, CMD if needed
+    // scan modifier key (only SHIFT), user implement ALT, CTRL, CMD if needed
     //if ( 1 == digitalRead(shiftPin) )
     //{
     //  modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
@@ -435,6 +439,71 @@ void scanLoop(){
         //check each key - if one is pressed we enter here
         if ( 1 == digitalRead(rows[j]) ){
 
+          //lookup the key in the current HID table
+          for(int k = activeLayers.size(); k >= 0; k-- ){
+
+            uint8_t key = activeLayers[k][(i*5)+j];
+
+            //Check if the key is a modifier
+            if(key == anyOfPossibleModHIDs){
+
+              //control structure for how modifier operates 
+              /* 
+              if(isMomentary(key)) {
+                momentary(layerOf(key))
+              } else if (isToggle(key)) {
+                toggle(layerOf(key))
+              }
+              */
+
+              //start here - assume 1
+              if (isToggle(key)) {
+                // toggle the layer for the key
+                // toggle(layerOf(key))
+              }
+
+              switch (modifierControlType){
+                case toggle:
+                
+                break;
+                case momentary:
+                break;
+              }
+
+            }
+
+            //Check if the key is NULL - if it is, drop through to previous layer
+            else if(){
+
+            //check if the value on the "layer under test" is NULL - if it's not, we've foud a real key
+            //activeLayers[k][(i*5)+j] != NULLVAL
+            }
+
+            else{
+
+              //a real key was found! add it to the keycode buffer!
+              keycode[count++] = activeLayers[k][(i*5)+j];
+
+              break;
+            }
+
+            //a NULL key was found - NOT a real key OR a Modifier key - because we already checked for modifier keys. This means we fallthrough to the next layer. 
+            //Base layer must not have nulls - if it does we need to add a catch here
+            //else{
+            //  
+            //}
+
+          }
+
+
+
+
+
+
+
+
+
+          /*
 
           //check if its a special key within the current keymap: i.e. change layers:
           //maybe change to switch statement to handle output of checkLaerMdKey fic.... different switch statements handle toggle, momentary, etc...
@@ -506,6 +575,8 @@ void scanLoop(){
 
           }
 
+          */
+
           //6 is max keycode per report
           if ( count == 6)
           {
@@ -560,15 +631,57 @@ void scanLoop(){
 
 }
 
+#define MAX_NUM_LAYER_MODIFIER_KEYS 15
+uint8_t POSSIBLE_MODIFIERS[] = {"MO(0)","MO(1)",};
 
 //
 // task to control keyboard matrix scanning
 //
-bool checkIfLayerModifierKey(uint8_t indexI, uint8_t indexJ){
+bool checkIfLayerModifierKey(uint8_t myKey){
+
+  for(int i = MAX_NUM_LAYER_MODIFIER_KEYS; i >= 0 ; i--){
+
+    if(activeLayers[k][(i*5)+j] == POSSIBLE_MODIFIERS[i]){
+      return true;
+    }
+
+  }
 
   //activeLayers[k][(i*5)+j]
 
-  
+  //for(uint8_t i = sizeof(myModifier); i > 0 ; i++){
+
+  /* 
+
+    switch (myModifier){
+      CASE MO_0:
+        if(activeLayers[k][(i*5)+j] == MO_0){
+          return true;
+        }
+      break;
+      CASE MO_1:
+        if(activeLayers[k][(i*5)+j] == MO_0){
+          return true;
+        }
+      break;
+      CASE MO_2:
+      break
+      CASE MO_3:
+      break;
+      CASE MO_4:
+      break;
+      CASE MO_5:
+      break
+    }
+
+  //}
+
+  for(uint8_t i = sizeof(myModifier); i > 0 ; i++){
+
+  }
+  */
+  //https://prod.liveshare.vsengsaas.visualstudio.com/join?6F91834EF75EB885217EED95ECCBA4594997
+
 
   return false;
 }
@@ -581,3 +694,5 @@ void handlelayerModifierKey(){
 
 
 }
+
+
