@@ -261,7 +261,7 @@ Vector<uint8_t[length]> activeLayers;
 
 //keyboard state variables
 bool keyPressedPreviously = false;
-bool modifierPressedPreviously = false;
+//bool modifierPressedPreviously = false;
 
 
 //variables for 
@@ -269,10 +269,10 @@ bool modifierPressedPreviously = false;
 //bool usbHIDEnabled = false;
 //bool bleHIDEnabled = false;
 //bool keyboardActive = false;
-bool layerChange = false;
+//bool layerChange = false;
 
-enum layer{LAYER_0,LAYER_1,LAYER_2,LAYER_3,LAYER_4,LAYER_5,LAYER_6,LAYER_7,LAYER_8,LAYER_9,LAYER_10,LAYER_11,LAYER_12,LAYER_13,LAYER_14,LAYER_15};
-enum layer myLayer; //myLayer is a variable of type layer 
+//enum layer{LAYER_0,LAYER_1,LAYER_2,LAYER_3,LAYER_4,LAYER_5,LAYER_6,LAYER_7,LAYER_8,LAYER_9,LAYER_10,LAYER_11,LAYER_12,LAYER_13,LAYER_14,LAYER_15};
+//enum layer myLayer; //myLayer is a variable of type layer 
 
 
 
@@ -331,84 +331,6 @@ bool modifierKeyPressedPreviously = false;
 //
 void scanLoop(){
 
-    /*
-    //-------------- Handle layer switching ---------------------
-
-    //check if layer has changed
-    if(layerChange){
-
-        //if layer has changed switch hidmap to that layer
-        switch(myLayer){
-            case LAYER_0:
-            layerMapPointer = layerMap0;
-            break;
-
-            case LAYER_1:
-            layerMapPointer = layerMap1;
-            break;
-
-            case LAYER_2:
-            //layerMapPointer = layerMap2;
-            break;
-
-            case LAYER_3:
-            //layerMapPointer = layerMap3;
-            break;
-
-            case LAYER_4:
-            //layerMapPointer = layerMap4;
-            break;
-
-            case LAYER_5:
-            //layerMapPointer = layerMap5;
-            break;
-
-            case LAYER_6:
-            //layerMapPointer = layerMap6;
-            break;
-
-            case LAYER_7:
-            //layerMapPointer = layerMap7;
-            break;
-
-            case LAYER_8:
-            //layerMapPointer = layerMap8;
-            break;
-
-            case LAYER_9:
-            //layerMapPointer = layerMap9;
-            break;
-
-            case LAYER_10:
-            //layerMapPointer = layerMap10;
-            break;
-
-            case LAYER_11:
-            //layerMapPointer = layerMap11;
-            break;
-
-            case LAYER_12:
-            //layerMapPointer = layerMap12;
-            break;
-
-            case LAYER_13:
-            //layerMapPointer = layerMap13;
-            break;
-
-            case LAYER_14:
-            //layerMapPointer = layerMap14;
-            break;
-
-            case LAYER_15:
-            //layerMapPointer = layerMap15;
-            break;
-
-            default:
-            break;
-        }
-
-    }
-    */
 
     //-------------- Scan Pin Array and send report ---------------------
     bool anyKeyPressed = false;
@@ -442,140 +364,11 @@ void scanLoop(){
           //lookup the key in the current HID table
           for(int k = activeLayers.size(); k >= 0; k-- ){
 
-            uint8_t key = activeLayers[k][(i*5)+j];
+            //uint8_t key = activeLayers[k][(i*5)+j];
 
-            //Check if the key is a modifier
-            if(key == anyOfPossibleModHIDs){
-
-              //control structure for how modifier operates 
-              /* 
-              if(isMomentary(key)) {
-                momentary(layerOf(key))
-              } else if (isToggle(key)) {
-                toggle(layerOf(key))
-              }
-              */
-
-              //start here - assume 1
-              if (isToggle(key)) {
-                // toggle the layer for the key
-                // toggle(layerOf(key))
-              }
-
-              switch (modifierControlType){
-                case toggle:
-                
-                break;
-                case momentary:
-                break;
-              }
-
-            }
-
-            //Check if the key is NULL - if it is, drop through to previous layer
-            else if(){
-
-            //check if the value on the "layer under test" is NULL - if it's not, we've foud a real key
-            //activeLayers[k][(i*5)+j] != NULLVAL
-            }
-
-            else{
-
-              //a real key was found! add it to the keycode buffer!
-              keycode[count++] = activeLayers[k][(i*5)+j];
-
-              break;
-            }
-
-            //a NULL key was found - NOT a real key OR a Modifier key - because we already checked for modifier keys. This means we fallthrough to the next layer. 
-            //Base layer must not have nulls - if it does we need to add a catch here
-            //else{
-            //  
-            //}
+            keycode[count++] = activeLayers[k][(i*5)+j];
 
           }
-
-
-
-
-
-
-
-
-
-          /*
-
-          //check if its a special key within the current keymap: i.e. change layers:
-          //maybe change to switch statement to handle output of checkLaerMdKey fic.... different switch statements handle toggle, momentary, etc...
-          if(checkIfLayerModifierKey(i, j)){
-
-            //we got a layer modifier key!
-
-            //handle toggle
-            //user has pressed modifier key - we must either go up a layer if it's the first time this mod key has been pressed, or go back if the key has already been pressed
-            if(modifierKeyPressedPreviously){
-
-              //remove the layer - IE revert to previous layer because button was released
-              activeLayers.pop_back();
-
-            }else{
-
-              //add the layer that was selected by user as the next in the array of layers
-              activeLayers.push_back(layerDeterminedByModKey());
-
-            }
-
-
-
-            //determine if the layer we're on right now is the one associated with the modifer
-
-
-            //set state variables:
-            //let the next loop know that a modifier key was pressed in this loop
-            //modifierPressedPreviously = true;
-
-          }
-          //this occurs when a key was pressed BUT the key was not a modifier - thus it's a real key to send
-          else{
-
-            //set state variables:
-            //reset the modifier key flag so on the next loop we know that the modifer key was not pressed
-            //modifierKeyPressedPreviously = false;
-
-            //if pin is active (high), add its hid code to key report
-            //keycode[count++] = layerMapPointer[(i*5)+j];
-            //layerMapPointer = activeLayers[0];
-            //keycode[count++] = activeLayers[layerMapPointer[(i*5)+j]];
-            //layerMapPointer = activeLayers[0]; //layerMapPointer = layerMap0;
-            //keycode[count++] = activeLayers[0][(i*5)+j];
-
-            //for each layer selected and added by user inside our layer vector, we:
-            //maybe off by 1 error?
-            for(int k = activeLayers.size(); k >= 0; k-- ){
-
-              //check if the value on the "layer under test" is NULL - if it's not, we've foud a real key
-              if(activeLayers[k][(i*5)+j] != NULLVAL){
-
-                //a real key was found! add it to the keycode buffer!
-                keycode[count++] = activeLayers[k][(i*5)+j];
-
-                break;
-
-              }
-
-              //a NULL key was found - NOT a real key OR a Modifier key - because we already checked for modifier keys. This means we fallthrough to the next layer. 
-              //Base layer must not have nulls - if it does we need to add a catch here
-              //else{
-              //  
-              //}
-
-            }
-
-
-
-          }
-
-          */
 
           //6 is max keycode per report
           if ( count == 6)
@@ -592,12 +385,9 @@ void scanLoop(){
           //used later
           anyKeyPressed = true;
           keyPressedPreviously = true;
-
-
-
         }
 
-        //check anything else?
+       //check anything else?
 
       }
 
@@ -615,6 +405,7 @@ void scanLoop(){
     }
 
 
+
     // Send All-zero report to indicate there is no keys pressed
     // Most of the time, it is, though we don't need to send zero report
     // every loop(), only a key is pressed in previous loop() 
@@ -626,73 +417,8 @@ void scanLoop(){
     }  
     
 
+
     // Poll interval
     delay(10);
 
 }
-
-#define MAX_NUM_LAYER_MODIFIER_KEYS 15
-uint8_t POSSIBLE_MODIFIERS[] = {"MO(0)","MO(1)",};
-
-//
-// task to control keyboard matrix scanning
-//
-bool checkIfLayerModifierKey(uint8_t myKey){
-
-  for(int i = MAX_NUM_LAYER_MODIFIER_KEYS; i >= 0 ; i--){
-
-    if(activeLayers[k][(i*5)+j] == POSSIBLE_MODIFIERS[i]){
-      return true;
-    }
-
-  }
-
-  //activeLayers[k][(i*5)+j]
-
-  //for(uint8_t i = sizeof(myModifier); i > 0 ; i++){
-
-  /* 
-
-    switch (myModifier){
-      CASE MO_0:
-        if(activeLayers[k][(i*5)+j] == MO_0){
-          return true;
-        }
-      break;
-      CASE MO_1:
-        if(activeLayers[k][(i*5)+j] == MO_0){
-          return true;
-        }
-      break;
-      CASE MO_2:
-      break
-      CASE MO_3:
-      break;
-      CASE MO_4:
-      break;
-      CASE MO_5:
-      break
-    }
-
-  //}
-
-  for(uint8_t i = sizeof(myModifier); i > 0 ; i++){
-
-  }
-  */
-  //https://prod.liveshare.vsengsaas.visualstudio.com/join?6F91834EF75EB885217EED95ECCBA4594997
-
-
-  return false;
-}
-
-
-//
-// task to control keyboard matrix scanning
-//
-void handlelayerModifierKey(){
-
-
-}
-
-
