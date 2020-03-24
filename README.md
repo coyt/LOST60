@@ -3,7 +3,7 @@ Bluetooth Mechanical Keyboard Firmware
 
 #### LOST60 PCB Version 2.0 (SPRING 2020)
 <p align="center">
-<img width="800px" src="https://raw.githubusercontent.com/coyt/LOST60/blob/master/keyboardV2.jpg"/>
+<img width="800px" src="https://github.com/coyt/LOST60/blob/master/KeyboardV2.jpg"/>
 </p>
 
 #### LOST60 PCB Version 1.0 (FALL 2019)
@@ -22,7 +22,7 @@ Why custom firmare and not TMK/QMK/something else? Well, porting the necessary c
 #### Version 2.0 System Diagram
 
 <p align="center">
-<img width="800px" src="https://raw.githubusercontent.com/coyt/LOST60/blob/master/BLEKeyboardV2SystemDiagram.jpg"/>
+<img width="800px" src="https://github.com/coyt/LOST60/blob/master/BLEKeyboardV2SystemDiagram.jpg"/>
 </p>
 
 #### Hardware Features
