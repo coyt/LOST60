@@ -1,7 +1,6 @@
 #ifndef SCAN_H
 #define SCAN_H
 
-
 // ******************************
 //
 // Initial Test Code for Lost60 Bluetooth Keyboard
@@ -40,5 +39,10 @@ void scanSetup();
 void scanLoop();
 bool checkIfLayerModifierKey(uint8_t myKey);
 void handleLayerModifierKey();
+void shiftOutToMakeColumnHigh(int column);
+void shiftOutToMakeColumnLow(int column);
+
+
+
 
 #endif

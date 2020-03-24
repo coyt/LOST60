@@ -13,6 +13,7 @@
 #include "backlight.hpp"
 #include "scan.hpp"
 #include "power.hpp"
+#include "audio.hpp"
 
 
 //Core Object Declarations - these are externed in the main header file so others such as scan.cpp can see them
@@ -43,39 +44,77 @@ void setup()
   //startup message
   Serial.println("*** Lost60 Bluetooth Keyboard Starting Up... ***");
 
-  //setup bluetooth
-  setupBluetooth();
-
-  //Set up and start advertising
-  startAdv();
-
   //board debug led
   pinMode(MYLED, OUTPUT);
+
+  //select board version
+  //setup for version one
+  #if defined(LOST60_VER_ONE)
+
   
+      //setup bluetooth
+      setupBluetooth();
 
-  //**********
-  //setup other FreeRTOS tasks
-  //**********
+      //Set up and start advertising
+      startAdv();
 
-  // Create a task for underlighting (under key leds)
-  xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      //**********
+      //setup other FreeRTOS tasks
+      //**********
 
-  // Create a task for backlighting (rgb neopixels on bottom)
-  xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      // Create a task for underlighting (under key leds)
+      xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
-  // Create a task for keyboard matrix scanning
-  xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      // Create a task for backlighting (rgb neopixels on bottom)
+      xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
-  //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+      // Create a task for keyboard matrix scanning
+      xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
+      //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+
+  //setup for version two
+  #elif defined(LOST60_VER_TWO)
+
+      
+      //setup bluetooth
+      setupBluetooth();
+
+      //Set up and start advertising
+      startAdv();
+
+      //**********
+      //setup other FreeRTOS tasks
+      //**********
+
+      // Create a task for underlighting (under key leds)
+      xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for backlighting (rgb neopixels on bottom)
+      xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for audio - the two speakers on the board!
+      //xTaskCreate( audio_task, "audio", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for keyboard matrix scanning
+      xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+
+  //run hello world
+  #else
+
+      //No separate freeRTOS tasks need to be run for hello world. 
+
+  #endif
+    
 }
-
 
 //this code loops forever
 void loop() 
 {
 
-  // delay allows BLE SoC to put this thread to sleep
+  // delay allows BLE SoC to put this thread to sleep - make sure to add delay like this to all other thread loops
   delay(10);
 
 
@@ -105,11 +144,11 @@ void setupBluetooth(void){
     Bluefruit.begin();
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
     Bluefruit.setTxPower(4);
-    Bluefruit.setName("Lost60 Keyboard");
+    Bluefruit.setName(BLUETOOTH_NAME);
 
     // Configure and Start Device Information Service
-    bledis.setManufacturer("Barringer Engineering LLC");
-    bledis.setModel("Lost60 V1.0");
+    bledis.setManufacturer(BLUETOOTH_MANUFACTURER);
+    bledis.setModel(BLUETOOTH_MODEL);
     bledis.begin();
 
     /// Start BLE HID
@@ -180,14 +219,14 @@ void set_keyboard_led(uint16_t conn_handle, uint8_t led_bitmap)
   (void) conn_handle;
   
   // light up Red Led if any bits is set
-  if ( led_bitmap )
-  {
-    ledOn( LED_RED );
-  }
-  else
-  {
-    ledOff( LED_RED );
-  }
+  //if ( led_bitmap )
+  //{
+  //  ledOn( LED_RED );
+ // }
+  //else
+ // {
+  //  ledOff( LED_RED );
+  //}
 }
 
 
@@ -197,7 +236,11 @@ void set_keyboard_led(uint16_t conn_handle, uint8_t led_bitmap)
 void checkBattery(void)
 {  
 
-  float measuredvbat = analogRead(VBATPIN);
+  #if defined(LOST60_VER_ONE)
+    float measuredvbat = analogRead(VBATPIN);
+  #else
+    float measuredvbat = 3.3; //TODO FIX THIS //analogRead(VBATPIN);
+  #endif
 
   measuredvbat *= 2;    // we divided by 2, so multiply back
   measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage

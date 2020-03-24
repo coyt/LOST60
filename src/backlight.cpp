@@ -10,6 +10,11 @@
 //core config and dependencies in here
 #include "backlight.hpp"
 
+//Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_RGB + NEO_KHZ800);
+//Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_RBG + NEO_KHZ800);
+//Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_GBR + NEO_KHZ800);
+//Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_BRG + NEO_KHZ800);
 Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 // Argument 1 = Number of pixels in NeoPixel strip
@@ -68,10 +73,13 @@ void backlight_task (void* arg)
  */
 void setupBacklighting(){
 
+  pinMode(PIXEL_PIN, OUTPUT);
 
   //turn on load switch for neopixel power
   pinMode(PIXEL_ENABLE, OUTPUT);
   digitalWrite(PIXEL_ENABLE, HIGH);
+
+
 
 
   //initialize RGB "neopixels"

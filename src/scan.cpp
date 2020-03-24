@@ -6,43 +6,36 @@
 //
 // ******************************
 
-
 //core config and dependencies in here
 #include "scan.hpp"
 
-
+//select board version
+//for version one
+#if defined(LOST60_VER_ONE)
+    //for version two
+    //cols will be digitalOutputs and driven HIGH (1) while each row is scanned
+    uint8_t cols[] = {COL_1,COL_2,COL_3,COL_4,COL_5,COL_6,COL_7,COL_8,COL_9,COL_10,COL_11,COL_12,COL_13,COL_14};
+#elif defined(LOST60_VER_TWO)
+  //function definitions
+#else
+  //nothing
+#endif
 
 //rows will be digitalInputs and each will be read 
-uint8_t rows[] = {1,32,10,17,28};
-//row 1 = P0.24 = 1
-//row 2 = P0.21 = 32
-//row 3 = P0.27 = 10
-//row 4 = P0.28 = 17
-//row 5 = P0.20 = 28
+uint8_t rows[] = {ROW_1,ROW_2,ROW_3,ROW_4,ROW_5};
+
+//uint8_t* layerOf(uint8_t);
 
 
-//cols will be digitalOutputs and driven HIGH (1) while each row is scanned
-uint8_t cols[] = {41,42,43,5,13,30,47,46,4,3,38,40,39,7};
-//col 1 = P1.05 = 41
-//col 2 = P1.06 = 42
-//col 3 = P1.07 = 43
-//col 4 = P1.08 = 5
-//col 5 = P1.09 = 13
-//col 6 = P0.22 = 30
-//col 7 = P1.14 = 47
-//col 8 = P1.13 = 46
-//col 9 = P1.10 = 4
-//col 10 = P1.15 = 3
-//col 11 = P1.01 = 38
-//col 12 = P1.04 = 40
-//col 13 = P1.03 = 39
-//col 14 = P1.02 = 7
+uint8_t colCount = 14; //sizeof(cols);
+uint8_t rowCount = 5; //sizeof(rows);
 
 
-//pointer to active HID Layer Map
-uint8_t *layerMapPointer;
+const int length = sizeof(colCount*rowCount);
 
 
+//keyboard state variables
+bool keyPressedPreviously = false;
 //hid mapping layer zero (normal default layer)
 uint8_t layerMap0[] = 
 { 
@@ -114,7 +107,7 @@ HID_KEY_9,
 HID_KEY_O,
 HID_KEY_L,
 HID_KEY_COMMA,
-HID_KEY_NONE, //extra key after backspace - not used so make it none
+HID_KEY_A, //extra key after backspace - not used so make it none
 
 //COL11
 HID_KEY_0,
@@ -144,7 +137,6 @@ HID_KEY_RETURN, //enter
 HID_KEY_SHIFT_RIGHT,
 HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
 };
-
 
 //hid mapping layer one (second layer)
 uint8_t layerMap1[] = 
@@ -248,32 +240,12 @@ HID_KEY_SHIFT_RIGHT,
 HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
 };
 
-uint8_t* layerOf(uint8_t);
-
-
-uint8_t colCount = sizeof(cols);
-uint8_t rowCount = sizeof(rows);
-
-
-const int length = sizeof(colCount*rowCount);
-Vector<uint8_t[length]> activeLayers;
-
-
-//keyboard state variables
-bool keyPressedPreviously = false;
-//bool modifierPressedPreviously = false;
 
 
 //variables for 
 //#define KEYBOARD_SLEEP_TIME 60000 //60s 
 //bool usbHIDEnabled = false;
 //bool bleHIDEnabled = false;
-//bool keyboardActive = false;
-//bool layerChange = false;
-
-//enum layer{LAYER_0,LAYER_1,LAYER_2,LAYER_3,LAYER_4,LAYER_5,LAYER_6,LAYER_7,LAYER_8,LAYER_9,LAYER_10,LAYER_11,LAYER_12,LAYER_13,LAYER_14,LAYER_15};
-//enum layer myLayer; //myLayer is a variable of type layer 
-
 
 
 // Modifier keys, only take cares of Shift
@@ -312,15 +284,46 @@ void scanSetup(){
         pinMode(rows[i], INPUT_PULLDOWN);
     }
 
-    //setup column I/O as outputs
-    for(uint8_t i=0; i < colCount; i++){
-        pinMode(cols[i], OUTPUT);
-    }
+    //select board version
+    //for version one
+    #if defined(LOST60_VER_ONE)
 
-    //setup column I/O as LOW (0) before program starts
-    for(uint8_t i=0; i < colCount; i++){
-        digitalWrite(cols[i], LOW);
-    }
+          
+        //setup column I/O as outputs
+        for(uint8_t i=0; i < colCount; i++){
+            pinMode(cols[i], OUTPUT);
+        }
+
+        //setup column I/O as LOW (0) before program starts
+        for(uint8_t i=0; i < colCount; i++){
+            digitalWrite(cols[i], LOW);
+        }
+
+        //rows will be digitalInputs and each will be read 
+        //uint8_t rows[] = {ROW_1,ROW_2,ROW_3,ROW_4,ROW_5};
+
+        //cols will be digitalOutputs and driven HIGH (1) while each row is scanned
+        //uint8_t cols[] = {COL_1,COL_2,COL_3,COL_4,COL_5,COL_6,COL_7,COL_8,COL_9,COL_10,COL_11,COL_12,COL_13,COL_14};
+
+
+    //for version two
+    #elif defined(LOST60_VER_TWO)
+      
+        //setup shift registers
+        pinMode(SER_LATCH, OUTPUT);
+        pinMode(SER_DATA, OUTPUT);
+        pinMode(SER_CLK, OUTPUT);
+
+        digitalWrite(SER_LATCH, HIGH);
+        digitalWrite(SER_DATA, LOW);
+        digitalWrite(SER_CLK, LOW);
+
+
+
+    #else
+      //nothing
+
+    #endif
 
 }
 
@@ -351,8 +354,13 @@ void scanLoop(){
     //outside loop for iterating through each column
     for(uint8_t i=0; i < colCount; i++){
 
-      //pullup the I/O line for the column
-      digitalWrite(cols[i], HIGH);
+      #if defined(LOST60_VER_ONE)
+        //pullup the I/O line for the column
+        digitalWrite(cols[i], HIGH);
+      #else
+        //if we're using the shift registers for V2.0:
+        shiftOutToMakeColumnHigh(i);
+      #endif
 
       //inside loop for iterating through each row
       //scan normal key and send report
@@ -362,13 +370,13 @@ void scanLoop(){
         if ( 1 == digitalRead(rows[j]) ){
 
           //lookup the key in the current HID table
-          for(int k = activeLayers.size(); k >= 0; k-- ){
+          //for(int k = length; k >= 0; k-- ){
 
             //uint8_t key = activeLayers[k][(i*5)+j];
 
-            keycode[count++] = activeLayers[k][(i*5)+j];
+            keycode[count++] = layerMap0[(i*5)+j]; //activeLayers[k][(i*5)+j];
 
-          }
+          //}
 
           //6 is max keycode per report
           if ( count == 6)
@@ -391,8 +399,13 @@ void scanLoop(){
 
       }
 
-      //pulldown the I/O line for the column
-      digitalWrite(cols[i], LOW);
+      #if defined(LOST60_VER_ONE)
+        //pullup the I/O line for the column
+        digitalWrite(cols[i], LOW);
+      #else
+        //if we're using the shift registers for V2.0:
+        shiftOutToMakeColumnLow(i);
+      #endif
 
     }
 
@@ -422,3 +435,30 @@ void scanLoop(){
     delay(10);
 
 }
+
+#if defined(LOST60_VER_TWO)
+
+    void shiftOutToMakeColumnHigh(int column){
+
+        uint16_t shiftValue = pow(2, column);
+        uint8_t shiftValLow = shiftValue & 0xFF;
+        uint8_t shiftValHigh = (shiftValue & 0xFF00) >> 8;
+
+        digitalWrite(SER_LATCH, LOW);
+        shiftOut(SER_DATA, SER_CLK, MSBFIRST, shiftValHigh); //first number to 255
+        shiftOut(SER_DATA, SER_CLK, MSBFIRST, shiftValLow); //second number to 255
+        digitalWrite(SER_LATCH, HIGH);
+    }
+
+
+    void shiftOutToMakeColumnLow(int column){
+
+        uint8_t shiftValLow = 0x00;
+        uint8_t shiftValHigh = 0x00;
+
+        digitalWrite(SER_LATCH, LOW);
+        shiftOut(SER_DATA, SER_CLK, LSBFIRST, shiftValHigh); //first number to 255
+        shiftOut(SER_DATA, SER_CLK, LSBFIRST, shiftValLow); //second number to 255
+        digitalWrite(SER_LATCH, HIGH);
+    }
+#endif 
