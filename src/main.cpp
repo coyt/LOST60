@@ -7,26 +7,24 @@
 //
 // ******************************
 
-
 //core config and dependencies in here
 #include "Lost60.hpp"
 #include "underlight.hpp"
 #include "backlight.hpp"
 #include "scan.hpp"
 #include "power.hpp"
+#include "audio.hpp"
 
 
-//objects
+
+
+//Core Object Declarations - these are externed in the main header file so others such as scan.cpp can see them
 BLEDis bledis;
 BLEHidAdafruit blehid;
 
 
 //global variables
-bool hasKeyPressed = false;
 unsigned long previousTime = millis();
-unsigned long previousTimeTwo = millis();
-bool keyPressedPreviously = false;
-int i = 0;
 
 
 //function declarations
@@ -34,145 +32,6 @@ void set_keyboard_led(uint16_t conn_hdl, uint8_t led_bitmap);
 void startAdv(void);
 void setupBluetooth(void);
 void checkBattery(void);
-void colorWipe(uint32_t color, int wait);
-
-
-//rows will be digitalInputs and each will be read 
-uint8_t rows[] = {1,32,10,17,28};
-//row 1 = P0.24 = 1
-//row 2 = P0.21 = 32
-//row 3 = P0.27 = 10
-//row 4 = P0.28 = 17
-//row 5 = P0.20 = 28
-
-//cols will be digitalOutputs and driven HIGH (1) while each row is scanned
-uint8_t cols[] = {41,42,43,5,13,30,47,46,4,3,38,40,39,7};
-//col 1 = P1.05 = 41
-//col 2 = P1.06 = 42
-//col 3 = P1.07 = 43
-//col 4 = P1.08 = 5
-//col 5 = P1.09 = 13
-//col 6 = P0.22 = 30
-//col 7 = P1.14 = 47
-//col 8 = P1.13 = 46
-//col 9 = P1.10 = 4
-//col 10 = P1.15 = 3
-//col 11 = P1.01 = 38
-//col 12 = P1.04 = 40
-//col 13 = P1.03 = 39
-//col 14 = P1.02 = 7
-
-
-//hid mapping
-uint8_t hidcode[] = 
-{ 
-//COl1
-HID_KEY_ESCAPE, 
-HID_KEY_TAB,
-HID_KEY_CAPS_LOCK,
-HID_KEY_SHIFT_LEFT,
-HID_KEY_CONTROL_LEFT,
-
-//COL2
-HID_KEY_1,
-HID_KEY_Q,
-HID_KEY_A,
-HID_KEY_NONE, //left ISO extra key - not used so make it none
-HID_KEY_GUI_LEFT,
-
-//COL3
-HID_KEY_2,
-HID_KEY_W,
-HID_KEY_S,
-HID_KEY_Z,
-HID_KEY_ALT_LEFT,
-
-//COL4
-HID_KEY_3,
-HID_KEY_E,
-HID_KEY_D,
-HID_KEY_X,
-HID_KEY_NONE, //holder for empty spot in matrix
-
-//COL5
-HID_KEY_4,
-HID_KEY_R,
-HID_KEY_F,
-HID_KEY_C,
-HID_KEY_NONE, //holder for empty spot in matrix
-
-//COL6
-HID_KEY_5,
-HID_KEY_T,
-HID_KEY_G,
-HID_KEY_V,
-HID_KEY_SPACE,
-
-//COL7
-HID_KEY_6,
-HID_KEY_Y,
-HID_KEY_H,
-HID_KEY_B,
-HID_KEY_NONE, //holder for empty spot in matrix
-
-//COL8
-HID_KEY_7,
-HID_KEY_U,
-HID_KEY_J,
-HID_KEY_N,
-HID_KEY_NONE, //holder for empty spot in matrix
-
-//COL9
-HID_KEY_8,
-HID_KEY_I,
-HID_KEY_K,
-HID_KEY_M,
-HID_KEY_NONE, //holder for empty spot in matrix
-
-//COL10
-HID_KEY_9,
-HID_KEY_O,
-HID_KEY_L,
-HID_KEY_COMMA,
-HID_KEY_NONE, //extra key after backspace - not used so make it none
-
-//COL11
-HID_KEY_0,
-HID_KEY_P,
-HID_KEY_SEMICOLON,
-HID_KEY_PERIOD,
-HID_KEY_ARROW_LEFT,//HID_KEY_ALT_RIGHT, //mod4
-
-//COL12
-HID_KEY_MINUS,
-HID_KEY_BRACKET_LEFT,
-HID_KEY_APOSTROPHE,
-HID_KEY_SLASH,
-HID_KEY_ARROW_UP, //HID_KEY_GUI_RIGHT, //mod5
-
-//COL13
-HID_KEY_EQUAL,
-HID_KEY_BRACKET_RIGHT,
-HID_KEY_NONE, //right ISO extra key - not used so make it none
-HID_KEY_NONE, //right "FN" extra key - not used so make it none
-HID_KEY_ARROW_DOWN, //HID_KEY_APPLICATION, //mod6 "menu" / fn key is HID code 0x65
-
-//COL14
-HID_KEY_BACKSPACE,
-HID_KEY_BACKSLASH,
-HID_KEY_RETURN, //enter
-HID_KEY_SHIFT_RIGHT,
-HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
-};
-
-
-uint8_t colCount = sizeof(cols);
-uint8_t rowCount = sizeof(rows);
-
-
-// Modifier keys, only take cares of Shift
-// ATL, CTRL, CMD keys are left for user excersie.
-// uint8_t shiftPin = 11;
 
 
 //setup - this code runs once at startup
@@ -187,135 +46,77 @@ void setup()
   //startup message
   Serial.println("*** Lost60 Bluetooth Keyboard Starting Up... ***");
 
-
-  //setup row I/O as inputs with pulldowns
-  for(uint8_t i=0; i < rowCount; i++){
-      pinMode(rows[i], INPUT_PULLDOWN);
-  }
-
-  //setup column I/O as outputs
-  for(uint8_t i=0; i < colCount; i++){
-    pinMode(cols[i], OUTPUT);
-  }
-
-  //setup column I/O as LOW (0) before program starts
-  for(uint8_t i=0; i < colCount; i++){
-    digitalWrite(cols[i], LOW);
-  }
-
-
-  //setup bluetooth
-  setupBluetooth();
-
-  //Set up and start advertising
-  startAdv();
-
   //board debug led
   pinMode(MYLED, OUTPUT);
+
+  //select board version
+  //setup for version one
+  #if defined(LOST60_VER_ONE)
+
   
+      //setup bluetooth
+      setupBluetooth();
 
-  //**********
-  //setup other FreeRTOS tasks
-  //**********
+      //Set up and start advertising
+      startAdv();
 
-  // Create a task for underlighting (under key leds)
-  xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      //**********
+      //setup other FreeRTOS tasks
+      //**********
 
-  // Create a task for backlighting (rgb neopixels on bottom)
-  xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      // Create a task for underlighting (under key leds)
+      xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
-  // Create a task for keyboard matrix scanning
-  //xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+      // Create a task for backlighting (rgb neopixels on bottom)
+      xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
-  //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+      // Create a task for keyboard matrix scanning
+      xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
+      //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+
+  //setup for version two
+  #elif defined(LOST60_VER_TWO)
+
+      
+      //setup bluetooth
+      setupBluetooth();
+
+      //Set up and start advertising
+      startAdv();
+
+      //**********
+      //setup other FreeRTOS tasks
+      //**********
+
+      // Create a task for underlighting (under key leds)
+      xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for backlighting (rgb neopixels on bottom)
+      xTaskCreate( backlight_task, "backlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for audio - the two speakers on the board!
+      //xTaskCreate( audio_task, "audio", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      // Create a task for keyboard matrix scanning
+      xTaskCreate( scan_task, "scan", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
+
+      //xTaskCreate( hid_task, "hid", 128, NULL, configMAX_PRIORITIES-2, NULL);
+
+  //run hello world
+  #else
+
+      //No separate freeRTOS tasks need to be run for hello world. 
+
+  #endif
+    
 }
-
 
 //this code loops forever
 void loop() 
 {
 
-   
-  
-  //-------------- Scan Pin Array and send report ---------------------
-  bool anyKeyPressed = false;
-
-  uint8_t modifier = 0;
-  uint8_t count=0;
-  uint8_t keycode[6] = { 0 };
-
-  
-  // scan modifier key (only SHIFT), user implement ATL, CTRL, CMD if needed
-  //if ( 1 == digitalRead(shiftPin) )
-  //{
-  //  modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-  //}
-
-
-  //outside loop for iterating through each column
-  for(uint8_t i=0; i < colCount; i++){
-
-    //pullup the I/O line for the column
-    digitalWrite(cols[i], HIGH);
-
-    //inside loop for iterating through each row
-    //scan normal key and send report
-    for(uint8_t j=0; j < rowCount; j++){
-
-      //check each key
-      if ( 1 == digitalRead(rows[j]) ){
-        // if pin is active (high), add its hid code to key report
-        keycode[count++] = hidcode[(i*5)+j];
-
-        // 6 is max keycode per report
-        if ( count == 6)
-        {
-          blehid.keyboardReport(modifier, keycode);
-
-          // reset report
-          count = 0;
-          memset(keycode, 0, 6);
-        }
-
-        // used later
-        anyKeyPressed = true;
-        keyPressedPreviously = true;
-      } 
-
-      //check anything else?
-
-    }
-
-    //pulldown the I/O line for the column
-    digitalWrite(cols[i], LOW);
-
-  }
-
-
-  // Send any remaining keys (not accumulated up to 6)
-  if ( count )
-  {
-    blehid.keyboardReport(modifier, keycode);
-  }
-
-
-  // Send All-zero report to indicate there is no keys pressed
-  // Most of the time, it is, though we don't need to send zero report
-  // every loop(), only a key is pressed in previous loop() 
-  if ( !anyKeyPressed && keyPressedPreviously )
-  {
-    keyPressedPreviously = false;
-    blehid.keyRelease();
-  }  
-  
-
-  // Poll interval
-  delay(10);
-
-
-
-  // Poll interval
+  // delay allows BLE SoC to put this thread to sleep - make sure to add delay like this to all other thread loops
   delay(10);
 
 
@@ -333,41 +134,23 @@ void loop()
     checkBattery();
   }
 
-  /*
-  //neopixel control state
-  if(millis() - previousTimeTwo >= STATE_TWO_TIME ){
-    previousTimeTwo = millis();
-
-    i++;
-
-    for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-      strip.setPixelColor(i, strip.Color(  0, 255,   0));         //  Set pixel's color (in RAM)
-      strip.show();                          //  Update strip to match
-      //delay(5);                           //  Pause for a moment
-    }
-
-  }
-  */
-
 
 }
 
 
-/*
- * function to start bluetooth and set parameters
- */
-
- 
+//
+// function to start bluetooth and set parameters
+//
 void setupBluetooth(void){
       
     Bluefruit.begin();
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
     Bluefruit.setTxPower(4);
-    Bluefruit.setName("Lost60 Keyboard");
+    Bluefruit.setName(BLUETOOTH_NAME);
 
     // Configure and Start Device Information Service
-    bledis.setManufacturer("Barringer Engineering LLC");
-    bledis.setModel("Lost60 V1.0");
+    bledis.setManufacturer(BLUETOOTH_MANUFACTURER);
+    bledis.setModel(BLUETOOTH_MODEL);
     bledis.begin();
 
     /// Start BLE HID
@@ -393,10 +176,9 @@ void setupBluetooth(void){
 
 
 
-/*
- * function to begin bluetooth advertising
- */
- 
+//
+// function to begin bluetooth advertising
+//
 void startAdv(void)
 {  
     // Advertising packet
@@ -439,14 +221,14 @@ void set_keyboard_led(uint16_t conn_handle, uint8_t led_bitmap)
   (void) conn_handle;
   
   // light up Red Led if any bits is set
-  if ( led_bitmap )
-  {
-    ledOn( LED_RED );
-  }
-  else
-  {
-    ledOff( LED_RED );
-  }
+  //if ( led_bitmap )
+  //{
+  //  ledOn( LED_RED );
+ // }
+  //else
+ // {
+  //  ledOff( LED_RED );
+  //}
 }
 
 
@@ -456,7 +238,11 @@ void set_keyboard_led(uint16_t conn_handle, uint8_t led_bitmap)
 void checkBattery(void)
 {  
 
-  float measuredvbat = analogRead(VBATPIN);
+  #if defined(LOST60_VER_ONE)
+    float measuredvbat = analogRead(VBATPIN);
+  #else
+    float measuredvbat = 3.3; //TODO FIX THIS //analogRead(VBATPIN);
+  #endif
 
   measuredvbat *= 2;    // we divided by 2, so multiply back
   measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage

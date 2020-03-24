@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UNDERLIGHT_H
+#define UNDERLIGHT_H
 
 // ******************************
 //
@@ -23,3 +24,5 @@ void animationThree(void);
 void underlightOff(void);
 void underlightOn(void);
 void loadNewShiftRegisterData(uint16_t localData);
+
+#endif
