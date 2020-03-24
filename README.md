@@ -1,7 +1,12 @@
 # LOST60
 Bluetooth Mechanical Keyboard Firmware
 
+#### LOST60 PCB Version 2.0 (SPRING 2020)
+<p align="center">
+<img width="800px" src="https://raw.githubusercontent.com/coyt/LOST60/master/keyboardV2.jpg"/>
+</p>
 
+#### LOST60 PCB Version 1.0 (FALL 2019)
 <p align="center">
 <img width="800px" src="https://raw.githubusercontent.com/coyt/LOST60/master/keyboardpic.jpg"/>
 </p>
@@ -14,17 +19,27 @@ Codebase for the LOST60 Bluetooth 60% Mechanical Keyboard PCB. The PCB utilizes 
 
 Why custom firmare and not TMK/QMK/something else? Well, porting the necessary code is exceedingly difficult and time consuming due to the novelty of the nrf52840. Furthermore, some fundamental differences in featuresets exist - for example, the intent is to dynamically store and/or update configs and keymaps during runtime NOT during compile time as TMK/QMK do it currently. This should allow fast updates, dynamic config changes, and entirely new features. Streatch features include a hardware password manager built directly into the keyboard as well as support for HID hacking tools such as [Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) 
 
+#### Version 2.0 System Diagram
+
+<p align="center">
+<img width="800px" src="https://raw.githubusercontent.com/coyt/LOST60/master/BLEKeyboardV2SystemDiagram.jpg"/>
+</p>
+
 #### Hardware Features
-* 60% Mechanical Keyboard design based on GH60
+* 60% Mechanical Keyboard design based on GH60 Layout
 * USBC connector
 * Bluetooth 5.0 support
 * Full RGB underlighting with "neopixels"
 * Independently addressable single color key backlingting
-* Qi charging
+* Qi wireless charging
+* Advanced battery charging and management circuitry
+* Rotary encoder and TWO speakers for Synthesizer features (under development)
+* Several expansion ports (QUIIC, GROVE, CUSTOM)
 
 #### Software Features
 * Bluetooth HID keyboard
 * Simple Arduino style programming
+* Bootloader allowing firmware updates over USB C (Program your keyboard WITH your keyboard!)
 
 #### Planned Firmware Updates
 
@@ -44,15 +59,15 @@ Why custom firmare and not TMK/QMK/something else? Well, porting the necessary c
 
 #### Planned Hardware Updates
 
-- [ ] Add coulomb counting IC / improve voltage and power measurement
-- [ ] Improve backlighting LED brightness
-- [ ] Extend USB C connector out a bit
-- [ ] Fix underlighting load switch fly wire
-- [ ] Fix LiPo charger ground pour problem & improve charge rate
-- [ ] Remove onboard Lithium protection IC
-- [ ] Add physical power switch connection point
+- [x] Add coulomb counting IC / improve voltage and power measurement   (Complete in V2.0)
+- [ ] Improve backlighting LED brightness 
+- [x] Extend USB C connector out a bit                                  (Complete in V2.0)
+- [x] Fix underlighting load switch fly wire                            (Complete in V2.0)
+- [x] Fix LiPo charger ground pour problem & improve charge rate        (Complete in V2.0)
+- [x] Remove onboard Lithium protection IC                              (Complete in V2.0)
+- [ ] Add physical power switch connection point 
 - [ ] Change wiring so I/O emulates Feather nrf52840 board
-- [ ] Add QSPI memory chip
+- [x] Add QSPI memory chip                                              (Complete in V2.0)
 
 #### Development Setup
 

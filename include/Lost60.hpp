@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <bluefruit.h>
+#include <SparkFunBQ27441.h>
 
 
 //********** START CORE Configuration Selection **********
