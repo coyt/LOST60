@@ -33,7 +33,7 @@ void audio_task (void* arg)
   while (1)
   {
     //yield(); // yield run usb background task
-    delay(10); //main delay in this forever task loop
+    delay(100); //main delay in this forever task loop
 
     //instrument.update();
     //instrument2.update();

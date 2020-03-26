@@ -45,24 +45,36 @@ void backlight_task (void* arg)
 
     delay(10); //main delay in this forever task loop
 
-    
-    //do this to bring underlighting to a known state upon each change of mode
-    if(mode != lastMode){
-      lastMode = mode;
+    if(global_flag_SleepModeOne){
+      //turn off underlighting
+      digitalWrite(PIXEL_ENABLE, LOW);
+
+      delay(1000); //free up rtos
+    }
+    else{
+
+      //turn on underlighting
+      digitalWrite(PIXEL_ENABLE, HIGH); //turn pixels on if they aren't currently
+
+      //do this to bring underlighting to a known state upon each change of mode
+      if(mode != lastMode){
+        lastMode = mode;
+      }
+
+      switch(mode) {           // Start the new animation...
+        case 0:
+          backlightAnimationOne();
+          break;
+        case 1:
+          backlightAnimationTwo();
+          break;
+        case 2:
+          backlightAnimationThree();
+          break;
+      }
     }
 
-    switch(mode) {           // Start the new animation...
-      case 0:
-        backlightAnimationOne();
-        break;
-      case 1:
-        backlightAnimationTwo();
-        break;
-      case 2:
-        backlightAnimationThree();
-        break;
-    }
-    
+  
   }
 
 }

@@ -42,6 +42,11 @@ void handleLayerModifierKey();
 void shiftOutToMakeColumnHigh(int column);
 void shiftOutToMakeColumnLow(int column);
 
+void scanKeyMatrix();
+void setupLowPowerModeOne();
+void shiftOutToMakeAllColumnsHigh();
+void calledOnAnyPress();
+void breakdownLowPowerModeOne();
 
 
 

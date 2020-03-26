@@ -40,11 +40,15 @@
 extern BLEDis bledis;
 extern BLEHidAdafruit blehid;
 
+extern bool global_flag_SleepModeOne; 
+
 
 //misc definitions
 #define STATE_ONE_TIME 2000
 #define STATE_TWO_TIME 50
 #define LOOP_STACK_SZ   (512*3)
+
+#define SLEEP_MODE_ONE_TIMEOUT 60000*5 //1 min * num minutes
 
 
 

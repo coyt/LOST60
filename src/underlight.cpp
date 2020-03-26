@@ -34,24 +34,35 @@ void underlight_task (void* arg)
 
     delay(100); //main delay in this forever task loop
 
+
     
-    //do this to bring underlighting to a known state upon each change of mode
-    if(mode != lastMode){
+    if(global_flag_SleepModeOne){
+      //turn off underlighting
       underlightOff();
-      lastMode = mode;
+      delay(1000); //free up rtos
+    }
+    else{
+      //do this to bring underlighting to a known state upon each change of mode
+      if(mode != lastMode){
+        underlightOff();
+        lastMode = mode;
+      }
+
+      switch(mode) {           // Start the new animation...
+        case 0:
+          animationOne();
+          break;
+        case 1:
+          animationTwo();
+          break;
+        case 2:
+          animationThree();
+          break;
+      }
     }
 
-    switch(mode) {           // Start the new animation...
-      case 0:
-        animationOne();
-        break;
-      case 1:
-        animationTwo();
-        break;
-      case 2:
-        animationThree();
-        break;
-    }
+    
+
 
   }
 

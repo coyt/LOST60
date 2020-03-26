@@ -42,12 +42,18 @@ uint8_t rows[] = {ROW_1,ROW_2,ROW_3,ROW_4,ROW_5};
 
 //uint8_t* layerOf(uint8_t);
 
+//
+bool global_flag_SleepModeOne = false;
+
 
 uint8_t colCount = 14; //sizeof(cols);
 uint8_t rowCount = 5; //sizeof(rows);
 
 
 const int length = sizeof(colCount*rowCount);
+
+//misc variables
+volatile unsigned long localTimerOne = millis();
 
 
 //keyboard state variables
@@ -257,6 +263,14 @@ HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
 };
 
 
+//ISR functions
+void calledOnAnyPress(){
+  breakdownLowPowerModeOne();
+  localTimerOne = millis();
+  global_flag_SleepModeOne = false;
+
+}
+
 
 //variables for 
 //#define KEYBOARD_SLEEP_TIME 60000 //60s 
@@ -343,30 +357,45 @@ void scanSetup(){
 
 }
 
+
 bool modifierKeyPressedPreviously = false;
+
 
 //
 // this thread's loop function - will run in loops forever once started
 //
 void scanLoop(){
 
+  //if our timer runs down with no keybaord activity, we need to goto sleep and tell other threads to do the same
+  if(millis() - localTimerOne >= SLEEP_MODE_ONE_TIMEOUT){
 
-    //-------------- Scan Pin Array and send report ---------------------
+    //setup interrupt based low power mode waiting
+    setupLowPowerModeOne();
+
+    global_flag_SleepModeOne = true;
+    delay(1000); //give RTOS more sleep / low power time
+  }
+
+  //if global flag indicates "Awake" we should be operating as normal
+  if(!global_flag_SleepModeOne){
+    //we feed localTimerOne in the scanKeyMatrix function as long as valid key presses are received - so we stay awake
+    scanKeyMatrix();
+    delay(10); //matrix poll interval
+  }
+
+}
+
+
+//iterate through keybaord matrix, handle modifiers, and send key presses
+void scanKeyMatrix(){
+
+      //-------------- Scan Pin Array and send report ---------------------
     bool anyKeyPressed = false;
 
 
     uint8_t modifier = 0;
     uint8_t count=0;
     uint8_t keycode[6] = { 0 };
-
-    
-    // scan modifier key (only SHIFT), user implement ALT, CTRL, CMD if needed
-    //if ( 1 == digitalRead(shiftPin) )
-    //{
-    //  modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-    //}
-
-
 
 
     //outside loop for iterating through each column
@@ -387,7 +416,8 @@ void scanLoop(){
         //check each key - if one is pressed we enter here
         if ( 1 == digitalRead(rows[j]) ){
 
-          
+          //feed the local timer
+          localTimerOne = millis();
 
           /*
           //HERE we check for modifier keys properly!
@@ -500,13 +530,49 @@ void scanLoop(){
       //tud_hid_keyboard_key_release();
       blehid.keyRelease();
     }  
-    
-
-
-    // Poll interval
-    delay(10);
 
 }
+
+
+//setup for low power mode one
+void setupLowPowerModeOne(){
+
+  //make all column shift registers high - we want all buttons to wait for any one button press
+  shiftOutToMakeAllColumnsHigh();
+
+  delay(10);
+
+  //attach interrupts for rows
+  attachInterrupt(ROW_1, calledOnAnyPress,RISING);
+  attachInterrupt(ROW_2, calledOnAnyPress,RISING);
+  attachInterrupt(ROW_3, calledOnAnyPress,RISING);
+  attachInterrupt(ROW_4, calledOnAnyPress,RISING);
+  attachInterrupt(ROW_5, calledOnAnyPress,RISING);
+
+  delay(10);
+
+}
+
+void breakdownLowPowerModeOne(){
+
+  //attach interrupts for rows
+  detachInterrupt(ROW_1);
+  detachInterrupt(ROW_2);
+  detachInterrupt(ROW_3);
+  detachInterrupt(ROW_4);
+  detachInterrupt(ROW_5);
+
+
+  //make all column shift registers low - back to normal
+  shiftOutToMakeColumnLow(1);
+
+  //setup row I/O as inputs with pulldowns
+  for(uint8_t i=0; i < rowCount; i++){
+      pinMode(rows[i], INPUT_PULLDOWN);
+  }
+
+}
+
 
 #if defined(LOST60_VER_TWO)
 
@@ -527,6 +593,18 @@ void scanLoop(){
 
         uint8_t shiftValLow = 0x00;
         uint8_t shiftValHigh = 0x00;
+
+        digitalWrite(SER_LATCH, LOW);
+        shiftOut(SER_DATA, SER_CLK, LSBFIRST, shiftValHigh); //first number to 255
+        shiftOut(SER_DATA, SER_CLK, LSBFIRST, shiftValLow); //second number to 255
+        digitalWrite(SER_LATCH, HIGH);
+    }
+
+
+    void shiftOutToMakeAllColumnsHigh(){
+
+        uint8_t shiftValLow = 0xFF;
+        uint8_t shiftValHigh = 0xFF;
 
         digitalWrite(SER_LATCH, LOW);
         shiftOut(SER_DATA, SER_CLK, LSBFIRST, shiftValHigh); //first number to 255
