@@ -39,7 +39,7 @@ Pin mappings themselves are completely different between LOST60 PCB revisions. N
 
 #define ULED_ROW1       20      // D20 is A6 on P0.29
 #define ULED_ROW2       9       // D9 on P0.26
-#define ULED_ROW3       45      // D45 on P1.12
+#define ULED_ROW3       41//45      // D45 on P1.12
 #define ULED_ROW4       16      // D16 is P0.30 (A2)
 #define ULED_ROW5       21      // D21 is P0.31 (A7, ARef)
 

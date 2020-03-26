@@ -89,11 +89,12 @@ void setupBacklighting(){
 
   //load startup colors to neopixels
   for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-      strip.setPixelColor(i, strip.Color(  0, 255,   0));         //  Set pixel's color (in RAM)
+      //strip.setPixelColor(i, strip.Color( 255 , 0,   144)); //pink  
+      strip.setPixelColor(i, strip.Color( 31 , 117,   254)); //blue
+      //strip.setPixelColor(i, strip.Color( 0, 255,   0)); //green
       strip.show();                          //  Update strip to match
       delay(5);                           //  Pause for a moment
   }
-
 
 }
 

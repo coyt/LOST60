@@ -9,6 +9,22 @@
 //core config and dependencies in here
 #include "scan.hpp"
 
+//in a 14 col 5 row system:
+#define LEFT_SHIFT_COL_POSITION 0
+#define LEFT_SHIFT_ROW_POSITION 3
+
+#define RIGHT_SHIFT_COL_POSITION 13
+#define RIGHT_SHIFT_ROW_POSITION 3
+
+#define LEFT_CONTROL_COL_POSITION 4
+#define LEFT_CONTROL_ROW_POSITION 0
+
+#define LEFT_WINDOWS_COL_POSITION 4
+#define LEFT_WINDOWS_ROW_POSITION 1
+
+#define LEFT_ALT_COL_POSITION 4
+#define LEFT_ALT_ROW_POSITION 2
+
 //select board version
 //for version one
 #if defined(LOST60_VER_ONE)
@@ -40,7 +56,7 @@ bool keyPressedPreviously = false;
 uint8_t layerMap0[] = 
 { 
 //COl1
-HID_KEY_ESCAPE, 
+HID_KEY_GRAVE, 
 HID_KEY_TAB,
 HID_KEY_CAPS_LOCK,
 HID_KEY_SHIFT_LEFT,
@@ -107,7 +123,7 @@ HID_KEY_9,
 HID_KEY_O,
 HID_KEY_L,
 HID_KEY_COMMA,
-HID_KEY_A, //extra key after backspace - not used so make it none
+HID_KEY_ESCAPE, //extra key after backspace - not used so make it none //  THIS IS ROTARY ENCODER!!!!!!
 
 //COL11
 HID_KEY_0,
@@ -351,6 +367,8 @@ void scanLoop(){
     //}
 
 
+
+
     //outside loop for iterating through each column
     for(uint8_t i=0; i < colCount; i++){
 
@@ -369,14 +387,68 @@ void scanLoop(){
         //check each key - if one is pressed we enter here
         if ( 1 == digitalRead(rows[j]) ){
 
-          //lookup the key in the current HID table
-          //for(int k = length; k >= 0; k-- ){
+          
 
-            //uint8_t key = activeLayers[k][(i*5)+j];
+          /*
+          //HERE we check for modifier keys properly!
+          //shift key left
+          if((i == LEFT_SHIFT_COL_POSITION) && (j == LEFT_SHIFT_ROW_POSITION)){
+              modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+          }
+          //shift key right
+          if((i == RIGHT_SHIFT_COL_POSITION) && (j == RIGHT_SHIFT_ROW_POSITION)){
+              modifier |= KEYBOARD_MODIFIER_RIGHTSHIFT;
+          }
+          //control key left
+          if((i == LEFT_CONTROL_COL_POSITION) && (j == LEFT_CONTROL_ROW_POSITION)){
+              modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
+          }
+          //windows key left
+          if((i == LEFT_WINDOWS_COL_POSITION) && (j == LEFT_WINDOWS_ROW_POSITION)){
+              modifier |= KEYBOARD_MODIFIER_LEFTGUI;
+          }
+          //alt key left
+          if((i == LEFT_ALT_COL_POSITION) && (j == LEFT_ALT_ROW_POSITION)){
+              modifier |= KEYBOARD_MODIFIER_LEFTALT;
+          }
+          */
 
-            keycode[count++] = layerMap0[(i*5)+j]; //activeLayers[k][(i*5)+j];
+          uint8_t temp = layerMap0[(i*5)+j]; //activeLayers[k][(i*5)+j];
 
-          //}
+                    //HERE we check for modifier keys properly!
+          if(temp == HID_KEY_SHIFT_LEFT){
+            modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+          }
+
+          if(temp == HID_KEY_SHIFT_RIGHT){
+            modifier |= KEYBOARD_MODIFIER_RIGHTSHIFT;
+          }
+
+          if(temp == HID_KEY_CONTROL_LEFT){
+            modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
+          }
+
+          if(temp == HID_KEY_CONTROL_RIGHT){
+            modifier |= KEYBOARD_MODIFIER_RIGHTCTRL;
+          }
+
+          if(temp == HID_KEY_GUI_LEFT){
+            modifier |= KEYBOARD_MODIFIER_LEFTGUI;
+          }
+
+          if(temp == HID_KEY_GUI_RIGHT){
+            modifier |= KEYBOARD_MODIFIER_RIGHTGUI;
+          }
+
+          if(temp == HID_KEY_ALT_LEFT){
+            modifier |= KEYBOARD_MODIFIER_LEFTALT;
+          }
+
+          if(temp == HID_KEY_ALT_RIGHT){
+            modifier |= KEYBOARD_MODIFIER_RIGHTALT;
+          }
+            
+          keycode[count++] = temp;
 
           //6 is max keycode per report
           if ( count == 6)
