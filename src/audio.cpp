@@ -47,12 +47,18 @@ void audio_task (void* arg)
  */
 void setupAudio(){
 
-    //setup speaker pins
-    pinMode(SPEAKER_A, OUTPUT);
-    pinMode(SPEAKER_B, OUTPUT);
+    #if defined(LOST60_VER_ONE)
+      //we do no audio setup
+    #else
+      //setup speaker pins
+      pinMode(SPEAKER_A, OUTPUT);
+      pinMode(SPEAKER_B, OUTPUT);
 
-    digitalWrite(SPEAKER_A, LOW);
-    digitalWrite(SPEAKER_B, LOW);
+      digitalWrite(SPEAKER_A, LOW);
+      digitalWrite(SPEAKER_B, LOW);
+    #endif
+
+
 
     //tone(SPEAKER_A, 500);
     //tone(SPEAKER_B, 1000);

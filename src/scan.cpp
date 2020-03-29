@@ -9,22 +9,6 @@
 //core config and dependencies in here
 #include "scan.hpp"
 
-//in a 14 col 5 row system:
-#define LEFT_SHIFT_COL_POSITION 0
-#define LEFT_SHIFT_ROW_POSITION 3
-
-#define RIGHT_SHIFT_COL_POSITION 13
-#define RIGHT_SHIFT_ROW_POSITION 3
-
-#define LEFT_CONTROL_COL_POSITION 4
-#define LEFT_CONTROL_ROW_POSITION 0
-
-#define LEFT_WINDOWS_COL_POSITION 4
-#define LEFT_WINDOWS_ROW_POSITION 1
-
-#define LEFT_ALT_COL_POSITION 4
-#define LEFT_ALT_ROW_POSITION 2
-
 //select board version
 //for version one
 #if defined(LOST60_VER_ONE)
@@ -62,7 +46,7 @@ bool keyPressedPreviously = false;
 uint8_t layerMap0[] = 
 { 
 //COl1
-HID_KEY_GRAVE, 
+HID_KEY_ESCAPE, //normally HID_KEY_GRAVE - I like escape here instead
 HID_KEY_TAB,
 HID_KEY_CAPS_LOCK,
 HID_KEY_SHIFT_LEFT,
@@ -537,8 +521,15 @@ void scanKeyMatrix(){
 //setup for low power mode one
 void setupLowPowerModeOne(){
 
-  //make all column shift registers high - we want all buttons to wait for any one button press
-  shiftOutToMakeAllColumnsHigh();
+  #if defined(LOST60_VER_ONE)
+    //make all column rows high
+    for(uint8_t i=0; i < colCount; i++){
+        digitalWrite(cols[i], HIGH);
+    }
+  #else
+      //make all column shift registers high - we want all buttons to wait for any one button press
+    shiftOutToMakeAllColumnsHigh();
+  #endif
 
   delay(10);
 
@@ -555,16 +546,22 @@ void setupLowPowerModeOne(){
 
 void breakdownLowPowerModeOne(){
 
+  #if defined(LOST60_VER_ONE)
+    //make all column rows low again
+    for(uint8_t i=0; i < colCount; i++){
+        digitalWrite(cols[i], LOW);
+    }
+  #else
+    //make all column shift registers low - back to normal
+    shiftOutToMakeColumnLow(1);
+  #endif
+
   //attach interrupts for rows
   detachInterrupt(ROW_1);
   detachInterrupt(ROW_2);
   detachInterrupt(ROW_3);
   detachInterrupt(ROW_4);
   detachInterrupt(ROW_5);
-
-
-  //make all column shift registers low - back to normal
-  shiftOutToMakeColumnLow(1);
 
   //setup row I/O as inputs with pulldowns
   for(uint8_t i=0; i < rowCount; i++){

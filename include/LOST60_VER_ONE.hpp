@@ -40,26 +40,26 @@ defined in https://github.com/adafruit/Adafruit_nRF52_Arduino/blob/master/varian
 // ********** SWITCH MATRIX KEYBOARD MAPPINGS AS FOLLOWS **********
 
 //rows will be digitalInputs and each will be read 
-#define ROW_1   1       //row 1 = P0.24 = 1
-#define ROW_2   32      //row 2 = P0.21 = 32
+#define ROW_1   1       //good //row 1 = P0.24 = 
+#define ROW_2   32      //good //row 2 = P0.21 = 32
 #define ROW_3   10      //row 3 = P0.27 = 10
 #define ROW_4   17      //row 4 = P0.28 = 17
 #define ROW_5   28      //row 5 = P0.20 = 28
 
 //cols will be digitalOutputs and driven HIGH (1) while each row is scanned
-#define COL_1   41      //col 1 = P1.05 = 41
-#define COL_2   42      //col 2 = P1.06 = 42
-#define COL_3   43      //col 3 = P1.07 = 43
+#define COL_1   37//41      //col 1 = P1.05 = 41
+#define COL_2   38 //42      //col 2 = P1.06 = 42
+#define COL_3   39 //43      //col 3 = P1.07 = 43
 #define COL_4   5       //col 4 = P1.08 = 5
 #define COL_5   13      //col 5 = P1.09 = 13
 #define COL_6   30      //col 6 = P0.22 = 30
-#define COL_7   47      //col 7 = P1.14 = 47
-#define COL_8   46      //col 8 = P1.13 = 46
+#define COL_7   43 //47      //col 7 = P1.14 = 47
+#define COL_8   42 //46      //col 8 = P1.13 = 46
 #define COL_9   4       //col 9 = P1.10 = 4
 #define COL_10  3       //col 10 = P1.15 = 3
-#define COL_11  38      //col 11 = P1.01 = 38
-#define COL_12  40      //col 12 = P1.04 = 40
-#define COL_13  39      //col 13 = P1.03 = 39
+#define COL_11  34 //38      //col 11 = P1.01 = 38
+#define COL_12  36 //40      //col 12 = P1.04 = 40
+#define COL_13  35 //39      //col 13 = P1.03 = 39
 #define COL_14  7       //col 14 = P1.02 = 7
 
 

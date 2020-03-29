@@ -83,16 +83,16 @@ const uint32_t g_ADigitalPinMap[] =
   // 32,      // P1.00 is SWO   (attached to debug header)
   // 
   // The remaining pins are not connected (per schematic)
-   33,      // P1.01 is not connected per schematic
-   35,      // P1.03 is not connected per schematic
-   36,      // P1.04 is not connected per schematic
-   37,      // P1.05 is not connected per schematic
-   38,      // P1.06 is not connected per schematic
-   39,      // P1.07 is not connected per schematic
-   43,      // P1.11 is not connected per schematic
-   44,      // P1.12 is not connected per schematic
-   45,      // P1.13 is not connected per schematic
-   46,      // P1.14 is not connected per schematic
+   33,      //D34 // P1.01 is not connected per schematic
+   35,      //D35 // P1.03 is not connected per schematic
+   36,      //D36 // P1.04 is not connected per schematic
+   37,      //D37 // P1.05 is not connected per schematic
+   38,      //D38 // P1.06 is not connected per schematic
+   39,      //D39 // P1.07 is not connected per schematic
+   43,      //D40 // P1.11 is not connected per schematic
+   44,      //D41 // P1.12 is not connected per schematic
+   45,      //D42 // P1.13 is not connected per schematic
+   46,      //D43 // P1.14 is not connected per schematic
 };
 
 /*
