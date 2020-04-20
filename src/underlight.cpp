@@ -200,9 +200,9 @@ void animationTwo(void)
 //
 void animationThree(void)
 {  
-  
+  underlightOn();
+  delay(1000);
 }
-
 
 //
 // function defining underlighting off 

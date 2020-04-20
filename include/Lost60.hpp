@@ -20,8 +20,8 @@
 // COMMENT OUT ALL EXCEPT ONE OF THE FOLLOWING:
 
 //#define HELLO_WORLD      //this blinks the "user" LED on the PCB for testing that all is working.
-//#define LOST60_VER_ONE    //this selects code for version 1 of the LOST60 with much less features - used for legacy systems
-#define LOST60_VER_ONE    //this selects code for version 2 of the LOST60 with significant updates in features.
+#define LOST60_VER_ONE    //this selects code for version 1 of the LOST60 with much less features - used for legacy systems
+//#define LOST60_VER_TWO    //this selects code for version 2 of the LOST60 with significant updates in features.
 
 //********** END CORE Configuration Selection **********
 
@@ -35,12 +35,15 @@
   #include "LOST60_VER_TWO.hpp"
 #endif 
 
-
+ 
 //objects
 extern BLEDis bledis;
 extern BLEHidAdafruit blehid;
+extern BLEBas blebas;
 
-extern bool global_flag_SleepModeOne; 
+
+//global variables and data exchange across rtos threads
+extern volatile bool global_flag_SleepModeOne; 
 
 
 //misc definitions
@@ -50,7 +53,9 @@ extern bool global_flag_SleepModeOne;
 
 #define SLEEP_MODE_ONE_TIMEOUT 60000*5 //1 min * num minutes
 
+#define MAX_PRPH_CONNECTION 2
 
-
+//Set BATTERY_CAPACITY to the design capacity of your battery.
+#define BATTERY_CAPACITY 1600 // e.g. 850mAh battery
 
 #endif

@@ -27,7 +27,8 @@ uint8_t rows[] = {ROW_1,ROW_2,ROW_3,ROW_4,ROW_5};
 //uint8_t* layerOf(uint8_t);
 
 //
-bool global_flag_SleepModeOne = false;
+volatile bool global_flag_SleepModeOne = false;
+volatile bool local_flag_SleepModeOne_ISR_called = false; //only used in this file for local access
 
 
 uint8_t colCount = 14; //sizeof(cols);
@@ -38,6 +39,8 @@ const int length = sizeof(colCount*rowCount);
 
 //misc variables
 volatile unsigned long localTimerOne = millis();
+
+
 
 
 //keyboard state variables
@@ -249,10 +252,7 @@ HID_KEY_ARROW_RIGHT//HID_KEY_CONTROL_RIGHT //mod7
 
 //ISR functions
 void calledOnAnyPress(){
-  breakdownLowPowerModeOne();
-  localTimerOne = millis();
-  global_flag_SleepModeOne = false;
-
+  local_flag_SleepModeOne_ISR_called = true;
 }
 
 
@@ -350,15 +350,31 @@ bool modifierKeyPressedPreviously = false;
 //
 void scanLoop(){
 
-  //if our timer runs down with no keybaord activity, we need to goto sleep and tell other threads to do the same
-  if(millis() - localTimerOne >= SLEEP_MODE_ONE_TIMEOUT){
 
+  //ONLY RUN THIS SECTION ONCE IF OUR TIMER RUNS DOWN - DON'T RUN WHILE ACTUALLY IN A SLEEP MODE
+  //if our timer runs down with no keybaord activity, we need to goto sleep and tell other threads to do the same
+  if(millis() - localTimerOne >= SLEEP_MODE_ONE_TIMEOUT && !global_flag_SleepModeOne){
     //setup interrupt based low power mode waiting
     setupLowPowerModeOne();
-
     global_flag_SleepModeOne = true;
     delay(1000); //give RTOS more sleep / low power time
   }
+
+
+  //RUN THIS FUNCTION IF WE'RE IN SLEEP MODE - WE JUST NEED TO BE SLEEPING HERE AND OCCASIONALLY CHECKING THAT SLEEP STATE IS STILL SETUP PROPERLY?
+  if(global_flag_SleepModeOne){
+    delay(500); //give RTOS more sleep / low power time
+  }
+
+
+  //Run this only once as soon as we exit sleep mode - mainly to get code out of ISR 
+  if(local_flag_SleepModeOne_ISR_called){
+    local_flag_SleepModeOne_ISR_called = false;
+    global_flag_SleepModeOne = false;
+    breakdownLowPowerModeOne();
+    localTimerOne = millis();
+  }
+
 
   //if global flag indicates "Awake" we should be operating as normal
   if(!global_flag_SleepModeOne){
@@ -392,7 +408,7 @@ void scanKeyMatrix(){
         //if we're using the shift registers for V2.0:
         shiftOutToMakeColumnHigh(i);
       #endif
-
+                                
       //inside loop for iterating through each row
       //scan normal key and send report
       for(uint8_t j=0; j < rowCount; j++){

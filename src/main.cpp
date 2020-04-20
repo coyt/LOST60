@@ -19,19 +19,26 @@
 
 
 //Core Object Declarations - these are externed in the main header file so others such as scan.cpp can see them
-BLEDis bledis;
+BLEDis bledis; // device information
 BLEHidAdafruit blehid;
+//BLEBas  blebas;  // battery
 
 
 //global variables
 unsigned long previousTime = millis();
+uint8_t connection_count = 0;
 
+
+// Set BATTERY_CAPACITY to the design capacity of your battery.
+const unsigned int batteryCapacity = BATTERY_CAPACITY; // e.g. 850mAh battery
 
 //function declarations
 void set_keyboard_led(uint16_t conn_hdl, uint8_t led_bitmap);
 void startAdv(void);
 void setupBluetooth(void);
 void checkBattery(void);
+void setupBQ27441(void);
+void printBatteryStats();
 
 
 //setup - this code runs once at startup
@@ -48,6 +55,7 @@ void setup()
 
   //board debug led
   pinMode(MYLED, OUTPUT);
+
 
   //select board version
   //setup for version one
@@ -78,7 +86,9 @@ void setup()
   //setup for version two
   #elif defined(LOST60_VER_TWO)
 
-      
+      //setup battery monitoring
+      setupBQ27441();
+
       //setup bluetooth
       setupBluetooth();
 
@@ -88,7 +98,7 @@ void setup()
       //**********
       //setup other FreeRTOS tasks
       //**********
-
+ 
       // Create a task for underlighting (under key leds)
       xTaskCreate( underlight_task, "underlight", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, NULL);
 
@@ -131,7 +141,13 @@ void loop()
       digitalWrite(MYLED, HIGH);
     }
 
+  #if defined(LOST60_VER_ONE)
     checkBattery();
+  #else
+    printBatteryStats();
+  #endif
+
+    
   }
 
 
@@ -142,16 +158,31 @@ void loop()
 // function to start bluetooth and set parameters
 //
 void setupBluetooth(void){
-      
-    Bluefruit.begin();
+
+    // Config the peripheral connection with maximum bandwidth 
+    // more SRAM required by SoftDevice
+    // Note: All config***() function must be called before begin()
+    //Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
+        
+
+    // Initialize Bluefruit with max concurrent connections as Peripheral = 2, Central = 0
+    Bluefruit.begin(MAX_PRPH_CONNECTION, 0);
+    //Bluefruit.begin();
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
     Bluefruit.setTxPower(4);
     Bluefruit.setName(BLUETOOTH_NAME);
+
 
     // Configure and Start Device Information Service
     bledis.setManufacturer(BLUETOOTH_MANUFACTURER);
     bledis.setModel(BLUETOOTH_MODEL);
     bledis.begin();
+
+
+    // Start BLE Battery Service
+    //blebas.begin();
+    //blebas.write(100);
+
 
     /// Start BLE HID
     // Note: Apple requires BLE device must have min connection interval >= 20m
@@ -189,6 +220,7 @@ void startAdv(void)
     // Include BLE HID service
     Bluefruit.Advertising.addService(blehid);
 
+    // Secondary Scan Response packet (optional)
     // There is enough room for the dev name in the advertising packet
     Bluefruit.Advertising.addName();
 
@@ -235,6 +267,7 @@ void set_keyboard_led(uint16_t conn_handle, uint8_t led_bitmap)
 /*
  * function to check and print out battery voltage / status
  */
+
 void checkBattery(void)
 {  
 
@@ -253,5 +286,58 @@ void checkBattery(void)
   Serial.println(" ***" );
 
 }
+
+#if defined(LOST60_VER_ONE)
+  //do nothing
+#else
+  void setupBQ27441(void)
+  {
+    // Use lipo.begin() to initialize the BQ27441-G1A and confirm that it's
+    // connected and communicating.
+    if (!lipo.begin()) // begin() will return true if communication is successful
+    {
+    // If communication fails, print an error message and loop forever.
+      Serial.println("Error: Unable to communicate with BQ27441.");
+      Serial.println("  Check wiring and try again.");
+      Serial.println("  (Battery must be plugged into Battery Babysitter!)");
+      //while (1) ; //why would u do this!?
+    }
+    Serial.println("Connected to BQ27441!");
+    
+    // Uset lipo.setCapacity(BATTERY_CAPACITY) to set the design capacity
+    // of your battery.
+    lipo.setCapacity(batteryCapacity);
+  }
+
+
+  void printBatteryStats()
+  {
+    // Read battery stats from the BQ27441-G1A
+    unsigned int soc = lipo.soc();  // Read state-of-charge (%)
+    unsigned int volts = lipo.voltage(); // Read battery voltage (mV)
+    int current = lipo.current(AVG); // Read average current (mA)
+    unsigned int fullCapacity = lipo.capacity(FULL); // Read full capacity (mAh)
+    unsigned int capacity = lipo.capacity(REMAIN); // Read remaining capacity (mAh)
+    int power = lipo.power(); // Read average power draw (mW)
+    int health = lipo.soh(); // Read state-of-health (%)
+
+    // Now print out those values:
+    String toPrint = String(soc) + "% | ";
+    toPrint += String(volts) + " mV | ";
+    toPrint += String(current) + " mA | ";
+    toPrint += String(capacity) + " / ";
+    toPrint += String(fullCapacity) + " mAh | ";
+    toPrint += String(power) + " mW | ";
+    toPrint += String(health) + "%";
+    
+    Serial.println(toPrint);
+  }
+
+#endif
+
+
+
+
+
 
 
